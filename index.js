@@ -6,7 +6,7 @@ const Post = require('./models/Post');
 
 //CONFIG
 //Template Engine
-app.engine('handlebars', handlebars.engine({ defaultLayout: 'main' }))
+app.engine('handlebars', handlebars.engine({ defaultLayout: 'main', runtimeOptions: { allowProtoPropertiesByDefault: true, allowProtoMethodsByDefault: true, }, }))
 app.set('view engine', 'handlebars')
 //BODY PARSER
 app.use(body_parser.urlencoded({ extended: false }))
@@ -16,8 +16,9 @@ app.use(body_parser.json())
 
 app.get('/', function (req, res) {
 
-    res.render('home')
-
+    Post.findAll({ order: [['id', 'DESC']] }).then(function (posts) {
+        res.render('home', { posts: posts })
+    })
 })
 
 app.get('/cadastro', function (req, res) {
@@ -40,6 +41,20 @@ app.post('/add', function (req, res) {
     }).catch(function (erro) {
 
         res.send('Ocorreu um erro: ' + erro)
+
+    })
+
+})
+
+app.get('/deletar/:id', function (req, res) {
+
+    Post.destroy({ where: { id: req.params.id } }).then(function () {
+
+        res.send("Postagem deletada!")
+
+    }).catch(function (erro) {
+
+        res.send("Erro ao deletar " + erro)
 
     })
 
